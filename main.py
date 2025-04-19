@@ -33,7 +33,7 @@ class AudioLevel:
         self.random_number = random.randint(90, 100)
         self.admin_password = hashlib.sha256(("91" + str(self.random_number) + "91").encode()).hexdigest() # 密码
         self.audio_size = self.random_number / 100  # 音量大小
-        
+
         self.audio_control()# 音频控制
         self.create_tray_icon()# 托盘
 
@@ -44,6 +44,7 @@ class AudioLevel:
         self.volume_thread.start()
 
     def audio_control(self):  # 音频控制
+        print("音频控制...")
         devices = AudioUtilities.GetSpeakers()
         interface = devices.Activate(
             IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
@@ -51,7 +52,6 @@ class AudioLevel:
         self.original_volume = self.volume.GetMasterVolumeLevelScalar()
 
     def password_verification(self): # 输入密码
-        # 创建临时窗口管理对话框生命周期
         temp_root = tk.Toplevel(self.root)
         temp_root.withdraw()
         temp_root.grab_set()  # 强制焦点
@@ -76,6 +76,7 @@ class AudioLevel:
         return False
 
     def safe_exit(self):  # 安全退出
+        print("退出...")
         if self.password_verification():
             if messagebox.askyesno("确认", "确定要退出吗？", parent=self.root):
                 self.running = False
@@ -101,6 +102,7 @@ class AudioLevel:
             self.restore_volume()
 
     def create_tray_icon(self):  # 托盘
+        print("创建托盘...")
         image = Image.new('RGB', (64, 64), 'blue')
         menu = pystray.Menu(
             pystray.MenuItem('退出', lambda: self.root.after(0, self.safe_exit))
@@ -109,7 +111,7 @@ class AudioLevel:
         threading.Thread(target=self.tray_icon.run, daemon=True).start()
 
     def no_kill(self):  # 防杀进程
-        print()
+        print("防杀...")
 
 if __name__ == "__main__":
     # 检测管理员
