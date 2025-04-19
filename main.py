@@ -108,10 +108,8 @@ class AudioLevelSetter:
             image = Image.open("icon.ico")
         else:
             image = Image.new('RGB', (64, 64), 'blue')
-        menu = pystray.Menu(
-            pystray.MenuItem('退出', lambda: self.root.after(0, self.safe_exit))
-        )
-        self.tray_icon = pystray.Icon("audio_minimizer", image, "音量控制器", menu)
+        menu = pystray.Menu(pystray.MenuItem('退出', lambda: self.root.after(0, self.safe_exit)))
+        self.tray_icon = pystray.Icon("Audio Level Setter", image, "Audio Level Setter", menu)
         threading.Thread(target=self.tray_icon.run, daemon=True).start()
 
     def no_kill(self):  # 防杀进程
