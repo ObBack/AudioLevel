@@ -121,7 +121,7 @@ if __name__ == "__main__":
         # 互斥锁
         mutex = win32event.CreateMutex(None, False, "AudioLevelSetter_Mutex")
         if win32api.GetLastError() == 183:
-            messagebox.showerror("错误", "程序已在运行中！")
+            messagebox.showerror("错误", "程序已在运行！")
             exit(0)
         sys.mutex = mutex
         # 启动
