@@ -27,7 +27,7 @@ class AudioLevelSetter:
         # 窗口
         self.root = root_window
         self.root.protocol('WM_DELETE_WINDOW', self.root.withdraw())
-        self.root.withdraw()  # 隐藏主窗口
+        self.root.iconify()
         self.root.title("Audio Level Setter")
         
         # 变量
