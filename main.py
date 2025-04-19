@@ -22,13 +22,13 @@ from PIL import Image
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 
-class AudioLevel:
+class AudioLevelSetter:
     def __init__(self, root_window):  # 初始化程序
         # 窗口
         self.root = root_window
         self.root.protocol('WM_DELETE_WINDOW', self.root.withdraw())
         self.root.withdraw()  # 隐藏主窗口
-        self.root.title("Audio Level")
+        self.root.title("Audio Level Setter")
         
         # 变量
         self.random_number = random.randint(90, 100)
@@ -121,14 +121,14 @@ if __name__ == "__main__":
     # 检测管理员
     if ctypes.windll.shell32.IsUserAnAdmin():
         # 互斥锁
-        mutex = win32event.CreateMutex(None, False, "AudioLevelMinimizer_Mutex")
+        mutex = win32event.CreateMutex(None, False, "AudioLevelSetter_Mutex")
         if win32api.GetLastError() == 183:
             messagebox.showerror("错误", "程序已在运行中！")
             exit(0)
         sys.mutex = mutex
         # 启动
         root = tk.Tk()
-        app = AudioLevel(root)
+        app = AudioLevelSetter(root)
         root.mainloop()
     else:
         # 管理员
