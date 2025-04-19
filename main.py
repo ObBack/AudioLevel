@@ -41,13 +41,13 @@ class AudioLevelSetter:
         self.volume_thread = threading.Thread(target=self.adjust_volume_loop)
         self.volume_thread.daemon = True
         self.volume_thread.start()
-        print(f"音量线程已启动 | 存活状态: {self.volume_thread.is_alive()} | id: {self.volume_thread.ident}")
+        print(f"音量线程已启动 | 状态: {self.volume_thread.is_alive()} | id: {self.volume_thread.ident}")
 
         # 监控线程
         self.monitor_thread = threading.Thread(target=self.restart_process)
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
-        print(f"监控线程已启动 | 存活状态: {self.monitor_thread.is_alive()} | id: {self.monitor_thread.ident}")
+        print(f"监控线程已启动 | 状态: {self.monitor_thread.is_alive()} | id: {self.monitor_thread.ident}")
 
     def audio_control(self):  # 音频控制
         print("音频控制...")
@@ -157,9 +157,6 @@ class AudioLevelSetter:
         else:
             messagebox.showerror("错误", "!", parent=self.root)
 
-    def restart_process(self):  # 重启进程
-        print("booting...") # 装一下 以防用户看出来
-
 if __name__ == "__main__":
     # 检测管理员
     if ctypes.windll.shell32.IsUserAnAdmin():
@@ -174,7 +171,7 @@ if __name__ == "__main__":
         app = AudioLevelSetter(root)
         root.mainloop()
     else:
-        # 管理员
+        # 管理员获取
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, f'"{__file__}"', None, 1)
-        time.sleep(1)  # 等待
+        time.sleep(1)
         sys.exit(0)
