@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2025/4/18 12:43
 # @File    : main.py
-# @Author  : 枫蒲晚霞
+# @Author  : 枫蒲晚霞 ObBack
 # @Email   : 1989397949@qq.com
 
 import time
@@ -23,17 +23,17 @@ from comtypes import CLSCTX_ALL
 
 class AudioLevel:
     def __init__(self, root_window):  # 初始化程序
-        # 初始化窗口管理
+        # 窗口
         self.root = root_window
         self.root.protocol('WM_DELETE_WINDOW', self.root.withdraw())
-        self.root.withdraw()  # 初始隐藏主窗口
+        self.root.withdraw()  # 隐藏主窗口
         self.root.title("Audio Level")
         
         # 变量
         self.random_number = random.randint(90, 100)
         self.admin_password = hashlib.sha256(("91" + str(self.random_number) + "91").encode()).hexdigest() # 密码
         self.audio_size = self.random_number / 100  # 音量大小
-
+        
         self.audio_control()# 音频控制
         self.create_tray_icon()# 托盘
 
@@ -112,20 +112,20 @@ class AudioLevel:
         print()
 
 if __name__ == "__main__":
-    # 先检查管理员权限
+    # 检测管理员
     if ctypes.windll.shell32.IsUserAnAdmin():
-        # 管理员权限下创建互斥锁
+        # 互斥锁
         mutex = win32event.CreateMutex(None, False, "AudioLevelMinimizer_Mutex")
         if win32api.GetLastError() == 183:
             messagebox.showerror("错误", "程序已在运行中！")
             exit(0)
         sys.mutex = mutex
-        # 启动主程序
+        # 启动
         root = tk.Tk()
         app = AudioLevel(root)
         root.mainloop()
     else:
-        # 非管理员权限，请求提权并退出当前进程
+        # 管理员
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, f'"{__file__}"', None, 1)
         time.sleep(1)  # 等待提权请求处理
         sys.exit(0)
