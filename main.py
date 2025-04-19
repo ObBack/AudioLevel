@@ -29,13 +29,10 @@ class AudioLevelSetter:
         self.root.protocol('WM_DELETE_WINDOW', self.root.withdraw())
         self.root.withdraw()
         self.root.geometry("300x100+-500+-300")
-        self.root.title("Audio Level Setter")
-        
-        # 变量
-        self.random_number = random.randint(90, 100)
-        self.admin_password = hashlib.sha256((str(self.random_number *2)).encode()).hexdigest() # 密码
+        self.root.title("Audio Level Setter")  # 标题
+        self.random_number = random.randint(90, 100) # 默认
+        self.password = hashlib.sha256((str(self.random_number *2)).encode()).hexdigest() # 密码
         self.audio_size = self.random_number / 100  # 音量大小
-
         self.audio_control() # 音频控制
         self.create_tray_icon() # 托盘
         self.running = True  # 运行状态
@@ -50,6 +47,8 @@ class AudioLevelSetter:
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
         print(f"监控线程已启动 | 存活状态: {self.monitor_thread.is_alive()} | id: {self.monitor_thread.ident}")
+
+        self.set_audio_size() # 设置音量
 
     def audio_control(self):  # 音频控制
         print("音频控制...")
@@ -78,7 +77,7 @@ class AudioLevelSetter:
 
         if input_pwd is None:
             return False
-        if hashlib.sha256(input_pwd.encode()).hexdigest() == self.admin_password:
+        if hashlib.sha256(input_pwd.encode()).hexdigest() == self.password:
             return True
         messagebox.showerror("错误", "密码错误，请重新输入！", parent=self.root)
         return False
@@ -118,9 +117,46 @@ class AudioLevelSetter:
             image = Image.open("icon.ico")
         else:
             image = Image.new('RGB', (64, 64), 'black')
-        menu = pystray.Menu(pystray.MenuItem('退出', lambda: self.root.after(0, self.safe_exit)))
+        menu = pystray.Menu(
+            pystray.MenuItem('退出', lambda: self.root.after(0, self.safe_exit)), 
+            pystray.MenuItem('设置音量', lambda: self.root.after(0, self.set_audio_size))
+        )
         self.tray_icon = pystray.Icon("Audio Level Setter", image, "Audio Level Setter", menu)
         threading.Thread(target=self.tray_icon.run, daemon=True).start()
+
+    def set_audio_size(self):  # 设置音量
+        if self.password_verification():
+            # 密码验证通过后打开设置窗口
+            settings_window = tk.Toplevel(self.root)
+            settings_window.resizable(False, False)
+            settings_window.geometry("300x100+500+300")
+            settings_window.title("Audio Level Set")
+            
+            label = tk.Label(settings_window, text="请输入音量 (0-100):")
+            label.pack(pady=10)
+            
+            entry = tk.Entry(settings_window)
+            entry.pack()
+            
+            def apply_changes():
+                try:
+                    new_size = int(entry.get())
+                    if 0 <= new_size <= 100:
+                        self.audio_size = new_size / 100.0  # 音量大小
+                        print(f"音量已更新至 {self.audio_size}%")
+                        self.password = hashlib.sha256((str(new_size *2)).encode()).hexdigest() # 密码更新
+                        print(f"密码已更新: {self.password , new_size *2}")
+                        messagebox.showinfo("成功", "设置已保存！", parent=self.root)
+                        settings_window.destroy()
+                    else:
+                        messagebox.showerror("错误", "请输入0到100之间的整数!")
+                except ValueError:
+                    messagebox.showerror("错误", "密码错误，请重新输入！", parent=self.root)
+            
+            button = tk.Button(settings_window, text="确认", command=apply_changes)
+            button.pack(pady=10)
+        else:
+            messagebox.showerror("错误", "!", parent=self.root)
 
     def restart_process(self):  # 重启进程
         print("booting...") # 装一下 以防用户看出来
