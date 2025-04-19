@@ -14,6 +14,7 @@ import hashlib
 import win32event
 import win32api
 import random
+import os
 from tkinter import messagebox
 from tkinter import simpledialog
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
@@ -103,7 +104,10 @@ class AudioLevel:
 
     def create_tray_icon(self):  # 托盘
         print("创建托盘...")
-        image = Image.new('RGB', (64, 64), 'blue')
+        if os.path.exists("icon.ico"):
+            image = Image.open("icon.ico")
+        else:
+            image = Image.new('RGB', (64, 64), 'blue')
         menu = pystray.Menu(
             pystray.MenuItem('退出', lambda: self.root.after(0, self.safe_exit))
         )
@@ -129,5 +133,5 @@ if __name__ == "__main__":
     else:
         # 管理员
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, f'"{__file__}"', None, 1)
-        time.sleep(1)  # 等待提权请求处理
+        time.sleep(1)  # 等待
         sys.exit(0)
