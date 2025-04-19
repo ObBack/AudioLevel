@@ -13,7 +13,6 @@ import sys
 import hashlib
 import win32event
 import win32api
-import random
 import os
 from tkinter import messagebox
 from tkinter import simpledialog
@@ -37,6 +36,7 @@ class AudioLevelSetter:
         self.audio_control() # 音频控制
         self.create_tray_icon() # 托盘
         self.running = True  # 运行状态
+
         # 音量线程
         self.volume_thread = threading.Thread(target=self.adjust_volume_loop)
         self.volume_thread.daemon = True
