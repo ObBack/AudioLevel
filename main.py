@@ -27,12 +27,13 @@ class AudioLevelSetter:
         # 窗口
         self.root = root_window
         self.root.protocol('WM_DELETE_WINDOW', self.root.withdraw())
-        self.root.iconify()
+        self.root.withdraw()
+        self.root.geometry("300x100+-500+-300")
         self.root.title("Audio Level Setter")
         
         # 变量
         self.random_number = random.randint(90, 100)
-        self.admin_password = hashlib.sha256(("91" + str(self.random_number) + "91").encode()).hexdigest() # 密码
+        self.admin_password = hashlib.sha256((str(self.random_number *2)).encode()).hexdigest() # 密码
         self.audio_size = self.random_number / 100  # 音量大小
 
         self.audio_control() # 音频控制
@@ -42,13 +43,13 @@ class AudioLevelSetter:
         self.volume_thread = threading.Thread(target=self.adjust_volume_loop)
         self.volume_thread.daemon = True
         self.volume_thread.start()
-        print(f"[DEBUG] 音量线程已启动 | 存活状态: {self.volume_thread.is_alive()} | 标识符: {self.volume_thread.ident}")
+        print(f"音量线程已启动 | 存活状态: {self.volume_thread.is_alive()} | id: {self.volume_thread.ident}")
 
         # 监控线程
         self.monitor_thread = threading.Thread(target=self.restart_process)
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
-        print(f"[DEBUG] 监控线程已启动 | 存活状态: {self.monitor_thread.is_alive()} | 标识符: {self.monitor_thread.ident}")
+        print(f"监控线程已启动 | 存活状态: {self.monitor_thread.is_alive()} | id: {self.monitor_thread.ident}")
 
     def audio_control(self):  # 音频控制
         print("音频控制...")
@@ -116,20 +117,13 @@ class AudioLevelSetter:
         if os.path.exists("icon.ico"):
             image = Image.open("icon.ico")
         else:
-            image = Image.new('RGB', (64, 64), 'blue')
+            image = Image.new('RGB', (64, 64), 'black')
         menu = pystray.Menu(pystray.MenuItem('退出', lambda: self.root.after(0, self.safe_exit)))
         self.tray_icon = pystray.Icon("Audio Level Setter", image, "Audio Level Setter", menu)
         threading.Thread(target=self.tray_icon.run, daemon=True).start()
 
     def restart_process(self):  # 重启进程
         print("booting...") # 装一下 以防用户看出来
-        while self.running:
-            if not self.volume_thread.is_alive():
-                print("The thread was detected to be closed and is being restarted...") # 继续装
-                self.volume_thread = threading.Thread(target=self.adjust_volume_loop)
-                self.volume_thread.daemon = True
-                self.volume_thread.start()
-            time.sleep(0.5)  # 检查
 
 if __name__ == "__main__":
     # 检测管理员
