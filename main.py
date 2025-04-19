@@ -30,9 +30,10 @@ class AudioLevelSetter:
         self.root.withdraw()
         self.root.geometry("300x100+-500+-300")
         self.root.title("Audio Level Setter")  # 标题
-        self.random_number = random.randint(90, 100) # 默认
-        self.password = hashlib.sha256((str(self.random_number *2)).encode()).hexdigest() # 密码
-        self.audio_size = self.random_number / 100  # 音量大小
+        self.audio_control()
+        self.audio_size = self.original_volume  # 音量大小
+        self.password = hashlib.sha256((str(self.original_volume *200)).encode()).hexdigest() # 密码
+        self.set_audio_size(bypass_password=True)
         self.audio_control() # 音频控制
         self.create_tray_icon() # 托盘
         self.running = True  # 运行状态
@@ -48,8 +49,6 @@ class AudioLevelSetter:
         self.monitor_thread.start()
         print(f"监控线程已启动 | 存活状态: {self.monitor_thread.is_alive()} | id: {self.monitor_thread.ident}")
 
-        self.set_audio_size() # 设置音量
-
     def audio_control(self):  # 音频控制
         print("音频控制...")
         devices = AudioUtilities.GetSpeakers()
@@ -58,7 +57,7 @@ class AudioLevelSetter:
         self.volume = cast(interface, POINTER(IAudioEndpointVolume))
         self.original_volume = self.volume.GetMasterVolumeLevelScalar()
 
-    def password_verification(self): # 输入密码
+    def password_detection(self): # 密码检测
         temp_root = tk.Toplevel(self.root)
         temp_root.withdraw()
         temp_root.grab_set()  # 强制焦点
@@ -84,7 +83,7 @@ class AudioLevelSetter:
 
     def safe_exit(self):  # 安全退出
         print("退出...")
-        if self.password_verification():
+        if self.password_detection():
             if messagebox.askyesno("确认", "确定要退出吗？", parent=self.root):
                 self.running = False
                 self.volume_thread.join()  # 等待线程结束
@@ -124,8 +123,8 @@ class AudioLevelSetter:
         self.tray_icon = pystray.Icon("Audio Level Setter", image, "Audio Level Setter", menu)
         threading.Thread(target=self.tray_icon.run, daemon=True).start()
 
-    def set_audio_size(self):  # 设置音量
-        if self.password_verification():
+    def set_audio_size(self, bypass_password=False):  # 设置音量
+        if bypass_password or self.password_detection():
             # 密码验证通过后打开设置窗口
             settings_window = tk.Toplevel(self.root)
             settings_window.resizable(False, False)
