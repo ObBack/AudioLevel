@@ -35,14 +35,20 @@ class AudioLevelSetter:
         self.admin_password = hashlib.sha256(("91" + str(self.random_number) + "91").encode()).hexdigest() # 密码
         self.audio_size = self.random_number / 100  # 音量大小
 
-        self.audio_control()# 音频控制
-        self.create_tray_icon()# 托盘
-
+        self.audio_control() # 音频控制
+        self.create_tray_icon() # 托盘
+        self.running = True  # 运行状态
         # 音量线程
-        self.running = True
         self.volume_thread = threading.Thread(target=self.adjust_volume_loop)
         self.volume_thread.daemon = True
         self.volume_thread.start()
+        print(f"[DEBUG] 音量线程已启动 | 存活状态: {self.volume_thread.is_alive()} | 标识符: {self.volume_thread.ident}")
+
+        # 监控线程
+        self.monitor_thread = threading.Thread(target=self.restart_process)
+        self.monitor_thread.daemon = True
+        self.monitor_thread.start()
+        print(f"[DEBUG] 监控线程已启动 | 存活状态: {self.monitor_thread.is_alive()} | 标识符: {self.monitor_thread.ident}")
 
     def audio_control(self):  # 音频控制
         print("音频控制...")
@@ -82,6 +88,7 @@ class AudioLevelSetter:
             if messagebox.askyesno("确认", "确定要退出吗？", parent=self.root):
                 self.running = False
                 self.volume_thread.join()  # 等待线程结束
+                self.monitor_thread.join()  # 等待线程结束
                 self.tray_icon.stop()
                 self.restore_volume()
                 self.root.quit()  # 正确退出主循环
@@ -94,11 +101,13 @@ class AudioLevelSetter:
 
     def adjust_volume_loop(self):  # 控音量线程
         print(f"音量已保存: {self.original_volume*100:.0f}%")
-        print(f"音量已调整至{self.audio_size*100:.0f}%...")  # 修改提示信息
+        print(f"音量已调整至{self.audio_size*100:.0f}%...")
         try:
             while self.running:
                 self.volume.SetMasterVolumeLevelScalar(self.audio_size, None)
                 time.sleep(0.1)
+        except Exception as e:
+            print(f"音量线程异常: {e}")
         finally:
             self.restore_volume()
 
@@ -112,8 +121,15 @@ class AudioLevelSetter:
         self.tray_icon = pystray.Icon("Audio Level Setter", image, "Audio Level Setter", menu)
         threading.Thread(target=self.tray_icon.run, daemon=True).start()
 
-    def no_kill(self):  # 防杀进程
-        print("防杀...")
+    def restart_process(self):  # 重启进程
+        print("booting...") # 装一下 以防用户看出来
+        while self.running:
+            if not self.volume_thread.is_alive():
+                print("The thread was detected to be closed and is being restarted...") # 继续装
+                self.volume_thread = threading.Thread(target=self.adjust_volume_loop)
+                self.volume_thread.daemon = True
+                self.volume_thread.start()
+            time.sleep(0.5)  # 检查
 
 if __name__ == "__main__":
     # 检测管理员
