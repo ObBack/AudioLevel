@@ -28,7 +28,7 @@ class AudioLevelSetter:
         self.root.protocol('WM_DELETE_WINDOW', self.root.withdraw())
         self.root.withdraw()
         self.root.geometry("300x100+-500+-300")
-        self.root.title("Audio Level Setter")  # 标题
+        self.root.title("Audio Level Setter - 音量设置器")  # 标题
         self.set_audio_size(bypass_password=True)
         self.audio_control()
         self.audio_size = self.original_volume  # 音量大小
@@ -57,8 +57,8 @@ class AudioLevelSetter:
         input_pwd = None
         try:
             input_pwd = simpledialog.askstring(
-                "密码验证",
-                "请输入管理员密码:",
+                "密码验证 - Password Verification",
+                "请输入密码: \nPlease enter password:",
                 show='*',
                 parent=temp_root
             )
@@ -70,13 +70,13 @@ class AudioLevelSetter:
             return False
         if str(input_pwd) == self.password:
             return True
-        messagebox.showerror("错误", "密码错误，请重新输入！", parent=self.root)
+        messagebox.showerror("错误 - Error", "密码错误，请重新输入！ \nPassword error, please try again!", parent=self.root)
         return False
 
     def safe_exit(self):  # 安全退出
         print("退出...")
         if self.password_detection():
-            if messagebox.askyesno("确认", "确定要退出吗？", parent=self.root):
+            if messagebox.askyesno("确认 - Confirm", "确定要退出吗？ \nAre you sure to exit?", parent=self.root):
                 self.running = False
                 self.volume_thread.join() # 等待线程结束
                 self.tray_icon.stop()
@@ -109,8 +109,8 @@ class AudioLevelSetter:
         else:
             image = Image.new('RGB', (64, 64), 'black')
         menu = pystray.Menu(
-            pystray.MenuItem('退出', lambda: self.root.after(0, self.safe_exit)), 
-            pystray.MenuItem('设置音量', lambda: self.root.after(0, self.set_audio_size))
+            pystray.MenuItem('退出 - Exit', lambda: self.root.after(0, self.safe_exit)), 
+            pystray.MenuItem('设置音量 - Set Volume', lambda: self.root.after(0, self.set_audio_size))
         )
         self.tray_icon = pystray.Icon("Audio Level Setter", image, "Audio Level Setter", menu)
         threading.Thread(target=self.tray_icon.run, daemon=True).start()
@@ -120,9 +120,9 @@ class AudioLevelSetter:
             settings_window = tk.Toplevel(self.root)
             settings_window.resizable(False, False)
             settings_window.geometry("400x100+500+300")
-            settings_window.title("Audio Level Set")
+            settings_window.title("Audio Level Set - 音量设置")
             
-            label = tk.Label(settings_window, text="请输入音量 (0-100):")
+            label = tk.Label(settings_window, text="更改音量为：\nset volume to:")
             label.pack(pady=10)
             
             entry = tk.Entry(settings_window)
@@ -139,14 +139,14 @@ class AudioLevelSetter:
                         messagebox.showinfo("成功", "设置已保存！", parent=self.root)
                         settings_window.destroy()
                     else:
-                        messagebox.showerror("错误", "请输入0到100之间的整数!")
+                        messagebox.showerror("错误 - Error", "请输入0到100之间的整数! \nPlease enter an integer between 0 and 100.")
                 except ValueError:
-                    messagebox.showerror("错误", "错误！", parent=self.root)
+                    messagebox.showerror("错误 - Error", "错误！\nError!", parent=self.root)
             
-            button = tk.Button(settings_window, text="确认", command=apply_changes)
+            button = tk.Button(settings_window, text="确认 - Confirm", command=apply_changes)
             button.pack(pady=10)
         else:
-            messagebox.showerror("错误", "!", parent=self.root)
+            messagebox.showerror("错误 - Error", "!", parent=self.root)
 
 if __name__ == "__main__":
     # 检测管理员
@@ -154,7 +154,7 @@ if __name__ == "__main__":
         # 互斥锁
         mutex = win32event.CreateMutex(None, False, "AudioLevelSetter_Mutex")
         if win32api.GetLastError() == 183:
-            messagebox.showerror("错误", "程序已在运行！")
+            messagebox.showerror("错误 - Error", "程序已在运行！ \nProgram is already running!")
             exit(0)
         sys.mutex = mutex
         # 启动
