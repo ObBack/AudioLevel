@@ -135,7 +135,7 @@ class AudioLevelSetter:
                         print(f"音量已更新至 {self.audio_size * 100:.0f}%")
                         self.password = str(new_size *2)
                         print(f"密码已更新: {self.password}")
-                        messagebox.showinfo("成功", "设置已保存！", parent=self.root)
+                        messagebox.showinfo("成功 - Success", "设置已保存！ \nSetting saved!", parent=self.root)
                         settings_window.destroy()
                     else:
                         messagebox.showerror("错误 - Error", "请输入0到100之间的整数! \nPlease enter an integer between 0 and 100.")
