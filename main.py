@@ -10,8 +10,8 @@ import tkinter as tk
 import threading
 import ctypes
 import sys
-import hashlib
 import win32event
+import math
 import win32api
 import os
 from tkinter import messagebox
@@ -32,8 +32,7 @@ class AudioLevelSetter:
         self.set_audio_size(bypass_password=True)
         self.audio_control()
         self.audio_size = self.original_volume  # 音量大小
-        self.password = hashlib.sha256((str(self.original_volume *200)).encode()).hexdigest() # 密码
-        self.audio_control()
+        self.password = str(math.floor(self.volume.GetMasterVolumeLevelScalar() * 100) * 2) # 密码
         self.create_tray_icon() # 托盘
         self.running = True  # 运行状态
         self.volume_thread = threading.Thread(target=self.adjust_volume_loop)
@@ -66,7 +65,7 @@ class AudioLevelSetter:
 
         if input_pwd is None:
             return False
-        if hashlib.sha256(input_pwd.encode()).hexdigest() == self.password:
+        if str(input_pwd) == self.password:
             return True
         messagebox.showerror("错误", "密码错误，请重新输入！", parent=self.root)
         return False
@@ -77,11 +76,11 @@ class AudioLevelSetter:
             if messagebox.askyesno("确认", "确定要退出吗？", parent=self.root):
                 self.running = False
                 self.volume_thread.join()  # 等待线程结束
-                self.monitor_thread.join()  # 等待线程结束
                 self.tray_icon.stop()
                 self.restore_volume()
                 self.root.quit()  # 正确退出主循环
                 self.root.destroy()  # 最后销毁窗口
+        print(self.password)
         
     def restore_volume(self):  # 恢复音量
         if hasattr(self, 'original_volume'):
@@ -132,14 +131,14 @@ class AudioLevelSetter:
                     if 0 <= new_size <= 100:
                         self.audio_size = new_size / 100.0  # 音量大小
                         print(f"音量已更新至 {self.audio_size * 100:.0f}%")
-                        self.password = hashlib.sha256((str(new_size *2)).encode()).hexdigest() # 密码更新
-                        print(f"密码已更新: {self.password , new_size *2}")
+                        self.password = str(new_size *2) # 密码更新
+                        print(f"密码已更新: {self.password}")
                         messagebox.showinfo("成功", "设置已保存！", parent=self.root)
                         settings_window.destroy()
                     else:
                         messagebox.showerror("错误", "请输入0到100之间的整数!")
                 except ValueError:
-                    messagebox.showerror("错误", "密码错误，请重新输入！", parent=self.root)
+                    messagebox.showerror("错误", "错误！", parent=self.root)
             
             button = tk.Button(settings_window, text="确认", command=apply_changes)
             button.pack(pady=10)
