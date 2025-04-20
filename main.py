@@ -32,12 +32,15 @@ class AudioLevelSetter:
         self.set_audio_size(bypass_password=True)
         self.audio_control()
         self.audio_size = self.original_volume  # 音量大小
-        self.password = str(math.floor(self.volume.GetMasterVolumeLevelScalar() * 100) * 2) # 密码
+        self.password_set() # 密码
         self.create_tray_icon() # 托盘
         self.running = True  # 运行状态
         self.volume_thread = threading.Thread(target=self.adjust_volume_loop)
         self.volume_thread.daemon = True
         self.volume_thread.start()
+
+    def password_set(self): # 根据音量设置密码
+        self.password = str(math.floor(self.volume.GetMasterVolumeLevelScalar() * 100) * 2)
 
     def audio_control(self):  # 音频控制
         print("音频控制...")
