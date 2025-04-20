@@ -75,10 +75,10 @@ class AudioLevelSetter:
         if self.password_detection():
             if messagebox.askyesno("确认", "确定要退出吗？", parent=self.root):
                 self.running = False
-                self.volume_thread.join()  # 等待线程结束
+                self.volume_thread.join() # 等待线程结束
                 self.tray_icon.stop()
                 self.restore_volume()
-                self.root.quit()  # 正确退出主循环
+                self.root.quit()  # 退出主
                 self.root.destroy()  # 最后销毁窗口
         print(self.password)
         
@@ -129,9 +129,9 @@ class AudioLevelSetter:
                 try:
                     new_size = int(entry.get())
                     if 0 <= new_size <= 100:
-                        self.audio_size = new_size / 100.0  # 音量大小
+                        self.audio_size = new_size / 100.0
                         print(f"音量已更新至 {self.audio_size * 100:.0f}%")
-                        self.password = str(new_size *2) # 密码更新
+                        self.password = str(new_size *2)
                         print(f"密码已更新: {self.password}")
                         messagebox.showinfo("成功", "设置已保存！", parent=self.root)
                         settings_window.destroy()
