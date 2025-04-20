@@ -83,7 +83,6 @@ class AudioLevelSetter:
                 self.restore_volume()
                 self.root.quit()  # 退出主
                 self.root.destroy()  # 最后销毁窗口
-        print(self.password)
         
     def restore_volume(self):  # 恢复音量
         if hasattr(self, 'original_volume'):
@@ -119,10 +118,10 @@ class AudioLevelSetter:
         if bypass_password or self.password_detection():
             settings_window = tk.Toplevel(self.root)
             settings_window.resizable(False, False)
-            settings_window.geometry("400x100+500+300")
+            settings_window.geometry("400x200+600+400")
             settings_window.title("Audio Level Set - 音量设置")
             
-            label = tk.Label(settings_window, text="更改音量为：\nset volume to:")
+            label = tk.Label(settings_window, text="更改音量为：\nset volume to:\n(0-100)")
             label.pack(pady=10)
             
             entry = tk.Entry(settings_window)
