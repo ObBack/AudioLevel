@@ -29,31 +29,21 @@ class AudioLevelSetter:
         self.root.withdraw()
         self.root.geometry("300x100+-500+-300")
         self.root.title("Audio Level Setter")  # 标题
+        self.set_audio_size(bypass_password=True)
         self.audio_control()
         self.audio_size = self.original_volume  # 音量大小
         self.password = hashlib.sha256((str(self.original_volume *200)).encode()).hexdigest() # 密码
-        self.set_audio_size(bypass_password=True)
-        self.audio_control() # 音频控制
+        self.audio_control()
         self.create_tray_icon() # 托盘
         self.running = True  # 运行状态
-
-        # 音量线程
         self.volume_thread = threading.Thread(target=self.adjust_volume_loop)
         self.volume_thread.daemon = True
         self.volume_thread.start()
-        print(f"音量线程已启动 | 状态: {self.volume_thread.is_alive()} | id: {self.volume_thread.ident}")
-
-        # 监控线程
-        self.monitor_thread = threading.Thread(target=self.restart_process)
-        self.monitor_thread.daemon = True
-        self.monitor_thread.start()
-        print(f"监控线程已启动 | 状态: {self.monitor_thread.is_alive()} | id: {self.monitor_thread.ident}")
 
     def audio_control(self):  # 音频控制
         print("音频控制...")
         devices = AudioUtilities.GetSpeakers()
-        interface = devices.Activate(
-            IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+        interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         self.volume = cast(interface, POINTER(IAudioEndpointVolume))
         self.original_volume = self.volume.GetMasterVolumeLevelScalar()
 
@@ -98,7 +88,7 @@ class AudioLevelSetter:
             self.volume.SetMasterVolumeLevelScalar(self.original_volume, None)
             print(f"\n音量已恢复至 {self.original_volume*100:.0f}%")
 
-    def adjust_volume_loop(self):  # 控音量线程
+    def adjust_volume_loop(self):  # 控音量
         print(f"音量已保存: {self.original_volume*100:.0f}%")
         print(f"音量已调整至{self.audio_size*100:.0f}%...")
         try:
@@ -106,7 +96,7 @@ class AudioLevelSetter:
                 self.volume.SetMasterVolumeLevelScalar(self.audio_size, None)
                 time.sleep(0.1)
         except Exception as e:
-            print(f"音量线程异常: {e}")
+            print(f"异常: {e}")
         finally:
             self.restore_volume()
 
@@ -123,12 +113,11 @@ class AudioLevelSetter:
         self.tray_icon = pystray.Icon("Audio Level Setter", image, "Audio Level Setter", menu)
         threading.Thread(target=self.tray_icon.run, daemon=True).start()
 
-    def set_audio_size(self, bypass_password=False):  # 设置音量
+    def set_audio_size(self, bypass_password=False):  # 调整设置音量
         if bypass_password or self.password_detection():
-            # 密码验证通过后打开设置窗口
             settings_window = tk.Toplevel(self.root)
             settings_window.resizable(False, False)
-            settings_window.geometry("300x100+500+300")
+            settings_window.geometry("400x100+500+300")
             settings_window.title("Audio Level Set")
             
             label = tk.Label(settings_window, text="请输入音量 (0-100):")
@@ -142,7 +131,7 @@ class AudioLevelSetter:
                     new_size = int(entry.get())
                     if 0 <= new_size <= 100:
                         self.audio_size = new_size / 100.0  # 音量大小
-                        print(f"音量已更新至 {self.audio_size}%")
+                        print(f"音量已更新至 {self.audio_size * 100:.0f}%")
                         self.password = hashlib.sha256((str(new_size *2)).encode()).hexdigest() # 密码更新
                         print(f"密码已更新: {self.password , new_size *2}")
                         messagebox.showinfo("成功", "设置已保存！", parent=self.root)
@@ -173,5 +162,5 @@ if __name__ == "__main__":
     else:
         # 管理员获取
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, f'"{__file__}"', None, 1)
-        time.sleep(1)
+        time.sleep(1)  # 等待
         sys.exit(0)
