@@ -81,7 +81,7 @@ class AudioLevelSetter:
                 self.volume_thread.join() # 等待线程结束
                 self.tray_icon.stop()
                 self.restore_volume()
-                self.root.quit()  # 退出主
+                self.root.quit()  # 退出
                 self.root.destroy()  # 最后销毁窗口
         
     def restore_volume(self):  # 恢复音量
